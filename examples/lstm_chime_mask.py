@@ -9,11 +9,11 @@ import os
 import tempfile
 import urllib
 import zipfile
-
-from lstm_init_currennt import load_currennt_model
-from lstm_init_currennt import init_theanets_model
+import gzip
+import json
 
 init_from_currennt_model = True
+current_model_file = 'currennt_trained_network.jsn.gz'
 
 logging = climate.get_logger('lstm-chime')
 
@@ -35,6 +35,83 @@ if not os.path.isfile(TRAIN_NC) or not os.path.isfile(VALID_NC):
     with open(VALID_NC, 'wb') as savefile:
         savefile.write(z.read('lstm_benchmarks-master/data/val_1_speaker.nc'))
     z.close()
+
+def load_currennt_model(network=None, filename=None):
+# written by M Umut Sen    
+    if network is None:
+        if filename[-2:] == 'gz':
+            with gzip.open(filename) as f:
+                    cont = f.read()
+        else:
+            with open(filename) as f:
+                    cont = f.read()
+        network = json.loads(cont)
+
+    layers = network['layers']
+    weights = network['weights']
+
+    out = []
+    
+    for l in layers:
+        L = l['size']
+        name = l['name']
+        layernow = {}
+        layernow['type'] = l['type']
+        
+        if l['type'] == 'lstm':
+            ws_input = weights[name]['input']
+            ws_bias = weights[name]['bias']
+            ws_internal = weights[name]['internal']
+            
+            PL = P*L
+                        
+            layernow['xc'] = np.transpose(np.reshape(ws_input[0:PL],(L,P)))
+            layernow['xi'] = np.transpose(np.reshape(ws_input[PL:2*PL],(L,P)))
+            layernow['xf'] = np.transpose(np.reshape(ws_input[2*PL:3*PL],(L,P)))
+            layernow['xo'] = np.transpose(np.reshape(ws_input[3*PL:4*PL],(L,P)))
+
+            layernow['xh'] = np.hstack((layernow['xi'],layernow['xf'],layernow['xc'],layernow['xo']))
+            
+            layernow['bc'] = ws_bias[0:L]
+            layernow['bi'] = ws_bias[L:2*L]
+            layernow['bf'] = ws_bias[2*L:3*L]
+            layernow['bo'] = ws_bias[3*L:4*L]
+
+            layernow['_b'] = np.hstack((layernow['bi'],layernow['bf'],layernow['bc'],layernow['bo']))
+            
+            layernow['hc'] = np.transpose(np.reshape(ws_internal[0:L*L],(L,L)))
+            layernow['hi'] = np.transpose(np.reshape(ws_internal[L*L:2*L*L],(L,L)))
+            layernow['hf'] = np.transpose(np.reshape(ws_internal[2*L*L:3*L*L],(L,L)))
+            layernow['ho'] = np.transpose(np.reshape(ws_internal[3*L*L:4*L*L],(L,L)))
+
+            layernow['hh'] = np.hstack((layernow['hi'],layernow['hf'],layernow['hc'],layernow['ho']))
+            
+            layernow['ci'] = ws_internal[4*L*L:4*L*L+L]
+            layernow['cf'] = ws_internal[4*L*L+L:4*L*L+2*L]
+            layernow['co'] = ws_internal[4*L*L+2*L:4*L*L+3*L]
+                        
+        elif l['type'] == 'softmax':
+            layernow['W'] = np.transpose(np.reshape(weights[name]['input'],(L,P)))
+            layernow['b'] = weights[name]['bias']
+
+        P = L
+        
+        if l['type'] == 'lstm' or l['type'] == 'softmax':
+            out.append(layernow)
+    
+    return out
+
+def init_theanets_model(net, init_layers):
+# written by M Umut Sen    
+    num_layers = len(net.layers)
+    for lay_ind in np.arange(num_layers-1)+1:
+        
+        if net.layers[lay_ind].name[0:4] == 'lstm':
+            for ind,w in enumerate(net.layers[lay_ind].params):
+                net.layers[lay_ind].params[ind].set_value(np.asarray(init_layers[lay_ind-1][w.name[-2:]],dtype=w.get_value().dtype))
+        elif net.layers[lay_ind].name[0:3] == 'out':
+            net.layers[lay_ind].params[0].set_value(np.asarray(init_layers[lay_ind-1]['W'],dtype=net.layers[lay_ind].params[0].get_value().dtype))
+            net.layers[lay_ind].params[1].set_value(np.asarray(init_layers[lay_ind-1]['b'],dtype=net.layers[lay_ind].params[1].get_value().dtype))
 
 def batch_at(features, labels, seqBegins, seqLengths):
     maxSeqLength = np.max(seqLengths)
@@ -83,7 +160,7 @@ def batches(dataset, choose_random=True):
 
 e = theanets.Experiment(
     theanets.maskedrecurrent.Classifier,
-    layers=(39, ('lstm',78), ('lstm' , 100),  51),
+    layers=(39, ('lstm',100), ('lstm' , 100),  51),
     recurrent_error_start=0,
     batch_size=BATCH_SIZE,
     optimize='sgd',
@@ -99,7 +176,7 @@ e = theanets.Experiment(
 )
 
 if (init_from_currennt_model):
-    currennt_trained_model = load_currennt_model(filename='model_currennt/trained_network2.jsn.gz')
+    currennt_trained_model = load_currennt_model(filename=current_model_file)
     init_theanets_model(net = e.network, init_layers=currennt_trained_model)
 
 e.train(batches(scipy.io.netcdf_file(open(TRAIN_NC))),

@@ -1,0 +1,123 @@
+nohup: ignoring input
+Started in hybrid online/batch training mode.
+Mini-batches (50 sequences each) will be shuffled during training.
+Using input noise with a standard deviation of 0.6.
+The trained network will be written to 'trained_network.jsn'.
+WARNING: The output file 'trained_network.jsn' already exists. It will be overwritten!
+Validation error will be calculated every 1 epochs.
+Training will be stopped after 100 epochs or if there is no new lowest validation error within 20 epochs.
+Utilizing the GPU for computations with 50 sequences in parallel.
+Normal distribution with mean=0 and sigma=0.1. Random seed: 973930452
+
+Using device #0 (GeForce GTX TITAN Black)
+Reading network from 'network2.jsn'... done.
+
+Loading training set '../train_1_speaker.nc' ...
+using cache file: /tmp/b4d9-5d2d-9745-194e
+... done.
+Loaded fraction:  100%
+Sequences:        1000
+Sequence lengths: 113..216
+Total timesteps:  148668
+
+Loading validation set '../val_1_speaker.nc' ...
+using cache file: /tmp/256c-f47e-6446-52b2
+... done.
+Loaded fraction:  100%
+Sequences:        102
+Sequence lengths: 113..152
+Total timesteps:  13878
+
+Creating the neural network... done.
+Layers:
+(0) input [size: 39]
+(1) lstm [size: 100, bias: 1.0, weights: 56300]
+(2) lstm [size: 100, bias: 1.0, weights: 80700]
+(3) softmax [size: 51, bias: 1.0, weights: 5151]
+(4) multiclass_classification [size: 51]
+Total weights: 142151
+
+
+Creating the optimizer... done.
+Optimizer type: Steepest descent with momentum
+Max training epochs:       100
+Max epochs until new best: 20
+Validation error every:    1
+Test error every:          1
+Learning rate:             1e-05
+Momentum:                  0.9
+
+Starting training...
+
+ Epoch | Duration |  Training error  | Validation error |    Test error    | New best 
+-------+----------+------------------+------------------+------------------+----------
+     0 |      0.8 | 99.31%   587.440 | 99.35%   538.505 |                  |  yes   
+     1 |      2.1 | 95.15%   567.346 | 94.89%   496.740 |                  |  yes   
+     2 |      2.1 | 88.82%   515.806 | 81.21%   460.571 |                  |  yes   
+     3 |      2.1 | 80.30%   479.632 | 82.70%   432.524 |                  |  yes   
+     4 |      2.1 | 74.90%   431.273 | 73.37%   385.504 |                  |  yes   
+     5 |      2.1 | 68.27%   376.522 | 64.82%   333.530 |                  |  yes   
+     6 |      2.1 | 61.21%   318.471 | 60.18%   282.644 |                  |  yes   
+     7 |      2.1 | 54.15%   278.583 | 54.22%   252.144 |                  |  yes   
+     8 |      2.1 | 49.51%   249.717 | 52.94%   235.214 |                  |  yes   
+     9 |      2.1 | 44.53%   224.518 | 43.95%   209.709 |                  |  yes   
+    10 |      2.1 | 41.77%   210.845 | 43.77%   201.815 |                  |  yes   
+    11 |      2.1 | 39.24%   196.386 | 45.35%   199.978 |                  |  yes   
+    12 |      2.1 | 36.57%   183.640 | 40.18%   185.468 |                  |  yes   
+    13 |      2.1 | 33.88%   172.341 | 38.75%   174.734 |                  |  yes   
+    14 |      2.1 | 33.03%   163.672 | 40.19%   176.651 |                  |  no    
+    15 |      2.1 | 31.94%   157.805 | 37.12%   167.710 |                  |  yes   
+    16 |      2.1 | 31.35%   155.639 | 40.49%   191.781 |                  |  no    
+    17 |      2.1 | 28.88%   143.217 | 35.37%   153.453 |                  |  yes   
+    18 |      2.1 | 29.61%   146.557 | 36.75%   170.873 |                  |  no    
+    19 |      2.1 | 27.57%   132.874 | 35.08%   158.209 |                  |  no    
+    20 |      2.1 | 27.19%   133.441 | 34.70%   160.294 |                  |  no    
+    21 |      2.1 | 25.47%   124.970 | 34.82%   151.743 |                  |  yes   
+    22 |      2.1 | 25.67%   124.041 | 33.87%   153.271 |                  |  no    
+    23 |      2.1 | 24.68%   118.408 | 32.82%   144.928 |                  |  yes   
+    24 |      2.1 | 25.26%   123.989 | 32.43%   143.489 |                  |  yes   
+    25 |      2.1 | 23.57%   114.370 | 32.83%   142.393 |                  |  yes   
+    26 |      2.1 | 22.51%   106.546 | 32.63%   150.984 |                  |  no    
+    27 |      2.1 | 21.67%   103.857 | 31.46%   145.789 |                  |  no    
+    28 |      2.1 | 21.97%   105.510 | 30.92%   139.945 |                  |  yes   
+    29 |      2.1 | 22.21%   106.482 | 33.11%   154.691 |                  |  no    
+    30 |      2.1 | 21.64%   103.149 | 31.17%   145.339 |                  |  no    
+    31 |      2.1 | 20.75%    98.767 | 29.70%   135.792 |                  |  yes   
+    32 |      2.1 | 19.99%    95.275 | 30.25%   138.500 |                  |  no    
+    33 |      2.1 | 19.72%    93.930 | 30.16%   138.356 |                  |  no    
+    34 |      2.1 | 18.84%    90.540 | 29.70%   143.175 |                  |  no    
+    35 |      2.1 | 18.25%    86.641 | 30.14%   142.849 |                  |  no    
+    36 |      2.1 | 18.30%    86.556 | 31.36%   145.253 |                  |  no    
+    37 |      2.1 | 17.90%    85.881 | 30.29%   138.056 |                  |  no    
+    38 |      2.1 | 17.42%    82.370 | 30.58%   142.763 |                  |  no    
+    39 |      2.1 | 16.91%    78.910 | 29.34%   135.532 |                  |  yes   
+    40 |      2.1 | 16.89%    79.041 | 30.67%   145.753 |                  |  no    
+    41 |      2.1 | 16.71%    78.875 | 29.12%   135.373 |                  |  yes   
+    42 |      2.1 | 16.95%    79.018 | 30.83%   151.251 |                  |  no    
+    43 |      2.1 | 16.71%    76.908 | 27.92%   131.577 |                  |  yes   
+    44 |      2.1 | 16.01%    74.327 | 30.19%   141.017 |                  |  no    
+    45 |      2.1 | 16.69%    77.201 | 32.74%   158.722 |                  |  no    
+    46 |      2.1 | 16.31%    75.482 | 29.03%   143.793 |                  |  no    
+    47 |      2.1 | 15.38%    71.835 | 29.46%   142.434 |                  |  no    
+    48 |      2.1 | 15.33%    72.083 | 28.46%   134.643 |                  |  no    
+    49 |      2.1 | 14.53%    67.452 | 29.28%   139.604 |                  |  no    
+    50 |      2.1 | 14.45%    67.728 | 28.80%   134.539 |                  |  no    
+    51 |      2.1 | 14.27%    66.662 | 30.59%   154.941 |                  |  no    
+    52 |      2.1 | 14.40%    66.390 | 28.38%   138.828 |                  |  no    
+    53 |      2.1 | 13.97%    64.745 | 28.81%   139.514 |                  |  no    
+    54 |      2.1 | 14.03%    63.859 | 27.99%   134.689 |                  |  no    
+    55 |      2.1 | 13.48%    62.682 | 27.87%   135.746 |                  |  no    
+    56 |      2.1 | 13.35%    62.293 | 30.15%   147.408 |                  |  no    
+    57 |      2.1 | 13.24%    60.410 | 28.92%   144.393 |                  |  no    
+    58 |      2.1 | 13.56%    62.606 | 28.84%   143.521 |                  |  no    
+    59 |      2.1 | 13.19%    59.636 | 29.44%   148.311 |                  |  no    
+    60 |      2.1 | 12.91%    59.331 | 28.30%   140.490 |                  |  no    
+    61 |      2.1 | 13.26%    59.323 | 30.93%   157.769 |                  |  no    
+    62 |      2.1 | 13.81%    64.385 | 28.69%   147.123 |                  |  no    
+    63 |      2.1 | 12.90%    59.814 | 29.26%   152.152 |                  |  no    
+
+No new lowest error since 20 epochs. Training stopped.
+Lowest validation error: 131.577286
+
+Storing the trained network in 'trained_network.jsn'... done.
+Removing cache file(s) ...
