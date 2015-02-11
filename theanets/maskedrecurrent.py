@@ -34,6 +34,7 @@ def batches(samples, labels=None, steps=100, batch_size=64):
         batch_size parameter that was used when creating the recurrent network
         that will process the data.
 
+
     Returns
     -------
     callable :
@@ -133,7 +134,7 @@ class Predictor(Autoencoder):
         # and so forth.
         error = self.x[1:] - self.generate_prediction(self.outputs[-1])[:-1]
         err = error[self.error_start:]
-        return TT.mean((err * err).sum(axis=-1))
+        return TT.sum(self.mask * (err * err).sum(axis=-1)) / TT.sum(self.mask)
 
     def generate_prediction(self, y):
         '''Given outputs from each time step, map them to subsequent inputs.
@@ -172,13 +173,14 @@ class Regressor(Network, feedforward.Regressor):
 
         # for a regressor, this specifies the correct outputs for a given input.
         self.targets = TT.tensor3('targets')
+        self.mask = TT.imatrix('mask')
 
-        return [self.x, self.targets]
+        return [self.x, self.targets, self.mask]
 
     @property
     def error(self):
         err = (self.outputs[-1] - self.targets)[self.error_start:]
-        return TT.mean((err * err).sum(axis=-1))
+        return TT.sum(self.mask * (err * err).sum(axis=-1)) / TT.sum(self.mask)
 
 
 class Classifier(Network, feedforward.Classifier):
@@ -196,18 +198,20 @@ class Classifier(Network, feedforward.Classifier):
 
         # for a classifier, this specifies the correct labels for a given input.
         self.labels = TT.imatrix('labels')
+        self.mask = TT.imatrix('mask')
 
-        return [self.x, self.labels]
+        return [self.x, self.labels, self.mask]
 
     @property
     def error(self):
         '''Returns a theano computation of cross entropy.'''
         out = self.outputs[-1]
-        # flatten all but last components of the output and labels
+        # flatten all but last components of the output and labels and mask
         count = (out.shape[0] - self.error_start) * out.shape[1]
         correct = TT.reshape(self.labels[self.error_start:], (count, ))
+        flatmask = TT.reshape(self.mask[self.error_start:], (count, ))
         prob = TT.reshape(out[self.error_start:], (count, out.shape[2]))
-        return -TT.mean(TT.log(prob[TT.arange(count), correct]))
+        return -TT.sum(flatmask * TT.log(prob[TT.arange(count), correct])) / TT.sum(flatmask)
 
     @property
     def accuracy(self):
@@ -215,4 +219,4 @@ class Classifier(Network, feedforward.Classifier):
         out = self.outputs[-1]
         predict = TT.argmax(out, axis=-1)
         correct = TT.eq(predict, self.labels)
-        return TT.cast(100, FLOAT) * TT.mean(correct.flatten())
+        return TT.cast(100, FLOAT) * TT.sum(self.mask * correct) / TT.sum(self.mask)

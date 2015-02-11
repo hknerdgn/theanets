@@ -8,4 +8,5 @@ from .feedforward import Network, Autoencoder, Regressor, Classifier
 from . import flags
 from . import layers
 from . import recurrent
+from . import maskedrecurrent
 from . import trainer

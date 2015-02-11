@@ -691,6 +691,7 @@ class Recurrent(Layer):
             sequences=inputs,
             outputs_info=inits or [self.zeros()],
             go_backwards='back' in self.kwargs.get('direction', '').lower(),
+            truncate_gradient=self.kwargs.get('truncate_gradient',-1),
         )
 
 
